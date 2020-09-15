@@ -58,6 +58,21 @@ oe_result_t oe_datetime_now(oe_datetime_t* value);
  */
 void oe_datetime_log(const char* msg, const oe_datetime_t* date);
 
+/**
+ * Convert oe datetime to time_t.
+ */
+oe_result_t oe_datetime_to_time_t(const oe_datetime_t* datetime, time_t* value);
+
+/**
+ * Convert time_t to oe datetime.
+ */
+oe_result_t oe_time_t_to_datetime(const time_t* value, oe_datetime_t* datetime);
+
+/**
+ * Convert local time to GMT.
+ */
+oe_result_t oe_gmt_to_localtime(const time_t* gmtime, time_t* localtime);
+
 OE_EXTERNC_END
 
 #endif /* _OE_INTERNAL_DATETIME_H */
