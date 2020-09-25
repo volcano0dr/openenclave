@@ -230,7 +230,6 @@ oe_result_t oe_datetime_now(oe_datetime_t* value)
 {
     oe_result_t result = OE_UNEXPECTED;
     time_t now;
-    struct tm timeinfo;
 
     if (value == NULL)
         OE_RAISE(OE_INVALID_PARAMETER);
