@@ -230,7 +230,6 @@ oe_result_t oe_datetime_now(oe_datetime_t* value)
 {
     oe_result_t result = OE_UNEXPECTED;
     time_t now;
-    struct tm timeinfo;
 
     if (value == NULL)
         OE_RAISE(OE_INVALID_PARAMETER);
@@ -240,16 +239,9 @@ oe_result_t oe_datetime_now(oe_datetime_t* value)
 #else
     now = (time_t)(oe_get_time() / 1000);
 #endif
-    gmtime_r(&now, &timeinfo);
 
-    value->year = (uint32_t)timeinfo.tm_year + 1900;
-    value->month = (uint32_t)timeinfo.tm_mon + 1;
-    value->day = (uint32_t)timeinfo.tm_mday;
-    value->hours = (uint32_t)timeinfo.tm_hour;
-    value->minutes = (uint32_t)timeinfo.tm_min;
-    value->seconds = (uint32_t)timeinfo.tm_sec;
+    result = oe_time_t_to_datetime(&now, value);
 
-    result = OE_OK;
 done:
 
     return result;
@@ -264,4 +256,79 @@ void oe_datetime_log(const char* msg, const oe_datetime_t* date)
         oe_datetime_to_string(date, str, &size);
         OE_TRACE_VERBOSE("%s %s\n", msg, str);
     }
+}
+
+oe_result_t oe_datetime_to_time_t(const oe_datetime_t* datetime, time_t* value)
+{
+    oe_result_t result = OE_FAILURE;
+    time_t tmp = 0;
+    struct tm timeinfo = {0};
+
+    if (datetime == NULL || value == NULL)
+        OE_RAISE(OE_INVALID_PARAMETER);
+
+    OE_CHECK(oe_datetime_is_valid(datetime));
+
+    // Update timeinfo based on input oe_date_time
+    timeinfo.tm_year = (int)datetime->year - 1900;
+    timeinfo.tm_mon = (int)datetime->month - 1;
+    timeinfo.tm_mday = (int)datetime->day;
+    timeinfo.tm_hour = (int)datetime->hours;
+    timeinfo.tm_min = (int)datetime->minutes;
+    timeinfo.tm_sec = (int)datetime->seconds;
+
+    tmp = mktime(&timeinfo);
+
+    *value = tmp;
+
+    result = OE_OK;
+done:
+    return result;
+}
+
+oe_result_t oe_time_t_to_datetime(const time_t* value, oe_datetime_t* datetime)
+{
+    oe_result_t result = OE_FAILURE;
+    struct tm timeinfo = {0};
+
+    if (value == NULL || datetime == NULL)
+        OE_RAISE(OE_INVALID_PARAMETER);
+
+    gmtime_r(value, &timeinfo);
+
+    datetime->year = (uint32_t)timeinfo.tm_year + 1900;
+    datetime->month = (uint32_t)timeinfo.tm_mon + 1;
+    datetime->day = (uint32_t)timeinfo.tm_mday;
+    datetime->hours = (uint32_t)timeinfo.tm_hour;
+    datetime->minutes = (uint32_t)timeinfo.tm_min;
+    datetime->seconds = (uint32_t)timeinfo.tm_sec;
+
+    result = OE_OK;
+done:
+    return result;
+}
+
+oe_result_t oe_gmt_to_localtime(const time_t* gmtime, time_t* localtime)
+{
+    oe_result_t result = OE_FAILURE;
+    time_t now = 0;
+    time_t utc = 0;
+    time_t time_diff = 0;
+    struct tm timeinfo = {0};
+
+    if (localtime == NULL || gmtime == NULL)
+        OE_RAISE(OE_INVALID_PARAMETER);
+
+    now = time(NULL);
+    gmtime_r(&now, &timeinfo);
+
+    utc = mktime(&timeinfo);
+
+    time_diff = now - utc;
+
+    *localtime = *gmtime + time_diff;
+
+    result = OE_OK;
+done:
+    return result;
 }

@@ -10,6 +10,17 @@
 
 OE_EXTERNC_BEGIN
 
+#ifndef sgx_qvl_supplemental_t
+typedef struct _sgx_qvl_supplemental_t
+{
+    uint32_t version;
+    time_t earliest_issue_date;
+    time_t latest_issue_date;
+    time_t earliest_expiration_date;
+    time_t tcb_level_date_tag;
+} sgx_qvl_supplemental_t;
+#endif
+
 /*! \struct SGX endorsement item
  */
 typedef struct _oe_sgx_endorsement_item
